@@ -4,14 +4,22 @@ import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import './style.css';
 
+let isInited = false;
+
 const onDocumentClicked = () => {
+    // click only once
+    if (isInited) {
+        return;
+    }
+    isInited = true;
+
     // //initialise simplex noise instance
     // var noise = new SimplexNoise();
 
     // // create an AudioListener and add it to the camera
     // const listener = new THREE.AudioListener();
 
-    // // create an Audio source
+    // // // create an Audio source
     // const sound = new THREE.Audio( listener );
 
     // // load a sound and set it as the Audio object's buffer
@@ -23,23 +31,20 @@ const onDocumentClicked = () => {
     // });
 
     function vizInit() {
-        // var context = new AudioContext();
-        // var audio = document.getElementById("audio");
-        // audio.src = kiddiegoggles;
-        // audio.load();
-        // audio.play();
+        var context = new AudioContext();
+        var audio = document.getElementById("audio");
+        audio.src = kiddiegoggles;
+        audio.load();
+        audio.play();
 
-        // var src;
-        // if (src == undefined) {
-        //     src = context.createMediaElementSource(audio);  
-        // }
+        var src = context.createMediaElementSource(audio);  
         
-        // var analyser = context.createAnalyser();
-        // src.connect(analyser);
-        // analyser.connect(context.destination);
-        // analyser.fftSize = 512;
-        // var bufferLength = analyser.frequencyBinCount;
-        // var dataArray = new Uint8Array(bufferLength);
+        var analyser = context.createAnalyser();
+        src.connect(analyser);
+        analyser.connect(context.destination);
+        analyser.fftSize = 512;
+        var bufferLength = analyser.frequencyBinCount;
+        var dataArray = new Uint8Array(bufferLength);
 
         //here comes the webgl
         var scene = new THREE.Scene();
@@ -52,12 +57,12 @@ const onDocumentClicked = () => {
         var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
 
-        var planeGeometry = new THREE.PlaneGeometry(800, 800, 20, 20);
-        var planeMaterial = new THREE.MeshLambertMaterial({
-            color: 0x6904ce,
-            side: THREE.DoubleSide,
-            wireframe: true
-        });
+        // var planeGeometry = new THREE.PlaneGeometry(800, 800, 20, 20);
+        // var planeMaterial = new THREE.MeshLambertMaterial({
+        //     color: 0x6904ce,
+        //     side: THREE.DoubleSide,
+        //     wireframe: true
+        // });
         
         // var plane = new THREE.Mesh(planeGeometry, planeMaterial);
         // plane.rotation.x = -0.5 * Math.PI;
@@ -122,9 +127,9 @@ const onDocumentClicked = () => {
         
 
         //REMOVE THIS LATER, just inits for testing
-        // var lowerMaxFr = 0.5
-        // var upperAvgFr = 0.5
-        // makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
+        var lowerMaxFr = 0.5
+        var upperAvgFr = 0.5
+        makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
 
         group.rotation.y += 0.005;
         renderer.render(scene, camera);
@@ -137,21 +142,21 @@ const onDocumentClicked = () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // function makeRoughBall(mesh, bassFr, treFr) {
-        //     mesh.geometry.vertices.forEach(function (vertex, i) {
-        //         var offset = mesh.geometry.parameters.radius;
-        //         var amp = 7;
-        //         var time = window.performance.now();
-        //         vertex.normalize();
-        //         var rf = 0.00001;
-        //         var distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
-        //         vertex.multiplyScalar(distance);
-        //     });
-        //     mesh.geometry.verticesNeedUpdate = true;
-        //     mesh.geometry.normalsNeedUpdate = true;
-        //     mesh.geometry.computeVertexNormals();
-        //     mesh.geometry.computeFaceNormals();
-        // }
+        function makeRoughBall(mesh, bassFr, treFr) {
+            mesh.geometry.parameters.vertices.forEach(function (vertex, i) {
+                var offset = mesh.geometry.parameters.radius;
+                var amp = 7;
+                var time = window.performance.now();
+                vertex.normalize();
+                var rf = 0.00001;
+                var distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
+                vertex.multiplyScalar(distance);
+            });
+            mesh.geometry.verticesNeedUpdate = true;
+            mesh.geometry.normalsNeedUpdate = true;
+            mesh.geometry.computeVertexNormals();
+            mesh.geometry.computeFaceNormals();
+        }
 
         // function makeRoughGround(mesh, distortionFr) {
         //     mesh.geometry.vertices.forEach(function (vertex, i) {
