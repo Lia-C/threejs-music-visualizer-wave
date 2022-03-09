@@ -83,6 +83,9 @@ const onDocumentClicked = () => {
 
         var ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
         ball.position.set(0, 0, 0);
+
+        var ballInitVertices = [...ball.geometry.attributes.position.array];
+
         group.add(ball);
 
         var ambientLight = new THREE.AmbientLight(0xaaaaaa);
@@ -108,58 +111,65 @@ const onDocumentClicked = () => {
 
         function render() {
             
-            var verticesArr = ball.geometry.attributes.position.array;
 
-            // var dotGeometry = new THREE.BufferGeometry();
-            
-            for (var i = 0; i < verticesArr.length; i = i + 3){
-                var x = verticesArr[i];
-                var y = verticesArr[i+1];
-                var z = verticesArr[i+2];
-                var vertex = new THREE.Vector3(x,y,z)
-
-                vertex.multiplyScalar(1.001);
-                ball.geometry.attributes.position.array[i] = vertex.x
-                ball.geometry.attributes.position.array[i+1] = vertex.y
-                ball.geometry.attributes.position.array[i+2] = vertex.z
-                ball.geometry.attributes.position.needsUpdate = true;
-
-                if (i==0){
-                    console.log(vertex);
-                    
-                    console.log(vertex);
-                    console.log("DONE");
-                }
-              
-            }
-
-            
-
-            
-
-            // var dotMaterial = new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
-            // var dot = new THREE.Points( dotGeometry, dotMaterial );
-            // scene.add( dot );
-            
     
-        // analyser.getByteFrequencyData(dataArray);
+        analyser.getByteFrequencyData(dataArray);
 
-        // var lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
-        // var upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
+        var lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
+        var upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
 
-        // var overallAvg = avg(dataArray);
-        // var lowerMax = max(lowerHalfArray);
-        // var lowerAvg = avg(lowerHalfArray);
-        // var upperMax = max(upperHalfArray);
-        // var upperAvg = avg(upperHalfArray);
+        var overallAvg = avg(dataArray);
+        var lowerMax = max(lowerHalfArray);
+        var lowerAvg = avg(lowerHalfArray);
+        var upperMax = max(upperHalfArray);
+        var upperAvg = avg(upperHalfArray);
 
-        // var lowerMaxFr = lowerMax / lowerHalfArray.length;
-        // var lowerAvgFr = lowerAvg / lowerHalfArray.length;
-        // var upperMaxFr = upperMax / upperHalfArray.length;
-        // var upperAvgFr = upperAvg / upperHalfArray.length;
+        var lowerMaxFr = lowerMax / lowerHalfArray.length;
+        var lowerAvgFr = lowerAvg / lowerHalfArray.length;
+        var upperMaxFr = upperMax / upperHalfArray.length;
+        var upperAvgFr = upperAvg / upperHalfArray.length;
 
         // makeRoughGround(plane, modulate(upperAvgFr, 0, 1, 0.5, 4));
         // makeRoughGround(plane2, modulate(lowerMaxFr, 0, 1, 0.5, 4));
+
+        // var scaleFactor = modulate(lowerMaxFr, 0, 1, 0.996, 1.002) 
+        // console.log(scaleFactor)
+
+        var verticesArr = ball.geometry.attributes.position.array;
+            
+        for (var i = 0; i < verticesArr.length; i = i + 3){
+            var x = verticesArr[i];
+            var y = verticesArr[i+1];
+            var z = verticesArr[i+2];
+            var vertex = new THREE.Vector3(x,y,z)
+
+            // console.log(ballInitVertices);
+
+            
+            // vertex.x = ballInitVertices[i] + modulate(lowerMaxFr, 0, 1, -1, 1);
+            // vertex.y = ballInitVertices[i+1] + modulate(lowerMaxFr, 0, 1, -1, 1);
+            // vertex.z = ballInitVertices[i+2] + modulate(lowerMaxFr, 0, 1, -1, 1);
+
+            vertex.x = ballInitVertices[i] * modulate(lowerMaxFr, 0, 1, 1, 2);
+            vertex.y = ballInitVertices[i+1] * modulate(lowerMaxFr, 0, 1, 1, 2);
+            vertex.z = ballInitVertices[i+2] * modulate(lowerMaxFr, 0, 1, 1, 2);
+
+            // vertex.multiplyScalar(scaleFactor);
+
+            ball.geometry.attributes.position.array[i] = vertex.x
+            ball.geometry.attributes.position.array[i+1] = vertex.y
+            ball.geometry.attributes.position.array[i+2] = vertex.z
+            ball.geometry.attributes.position.needsUpdate = true;
+
+            // if (i==0){
+            //     console.log(vertex);
+                
+            //     console.log(vertex);
+            //     console.log("DONE");
+            // }
+          
+        }
+
         
 
         //REMOVE THIS LATER, just inits for testing
