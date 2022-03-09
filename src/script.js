@@ -3,6 +3,7 @@ import kiddiegoggles from './assets/audio/kiddiegoggles.mp3';
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import './style.css';
+import { Mesh } from 'three';
 
 let isInited = false;
 
@@ -106,6 +107,41 @@ const onDocumentClicked = () => {
         render();
 
         function render() {
+            
+            var verticesArr = ball.geometry.attributes.position.array;
+
+            // var dotGeometry = new THREE.BufferGeometry();
+            
+            for (var i = 0; i < verticesArr.length; i = i + 3){
+                var x = verticesArr[i];
+                var y = verticesArr[i+1];
+                var z = verticesArr[i+2];
+                var vertex = new THREE.Vector3(x,y,z)
+
+                vertex.multiplyScalar(1.001);
+                ball.geometry.attributes.position.array[i] = vertex.x
+                ball.geometry.attributes.position.array[i+1] = vertex.y
+                ball.geometry.attributes.position.array[i+2] = vertex.z
+                ball.geometry.attributes.position.needsUpdate = true;
+
+                if (i==0){
+                    console.log(vertex);
+                    
+                    console.log(vertex);
+                    console.log("DONE");
+                }
+              
+            }
+
+            
+
+            
+
+            // var dotMaterial = new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
+            // var dot = new THREE.Points( dotGeometry, dotMaterial );
+            // scene.add( dot );
+            
+    
         // analyser.getByteFrequencyData(dataArray);
 
         // var lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
@@ -127,9 +163,9 @@ const onDocumentClicked = () => {
         
 
         //REMOVE THIS LATER, just inits for testing
-        var lowerMaxFr = 0.5
-        var upperAvgFr = 0.5
-        makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
+        // var lowerMaxFr = 0.5
+        // var upperAvgFr = 0.5
+        // makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
 
         group.rotation.y += 0.005;
         renderer.render(scene, camera);
@@ -142,21 +178,23 @@ const onDocumentClicked = () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function makeRoughBall(mesh, bassFr, treFr) {
-            mesh.geometry.parameters.vertices.forEach(function (vertex, i) {
-                var offset = mesh.geometry.parameters.radius;
-                var amp = 7;
-                var time = window.performance.now();
-                vertex.normalize();
-                var rf = 0.00001;
-                var distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
-                vertex.multiplyScalar(distance);
-            });
-            mesh.geometry.verticesNeedUpdate = true;
-            mesh.geometry.normalsNeedUpdate = true;
-            mesh.geometry.computeVertexNormals();
-            mesh.geometry.computeFaceNormals();
-        }
+        
+        // function makeRoughBall(mesh, bassFr, treFr) {
+        //     var vertices = mesh.geometry.attributes.position.array;
+        //     vertices.forEach(function (vertex, i) {
+        //         var offset = mesh.geometry.parameters.radius;
+        //         var amp = 7;
+        //         var time = window.performance.now();
+        //         vertex.normalize();
+        //         var rf = 0.00001;
+        //         var distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
+        //         vertex.multiplyScalar(distance);
+        //     });
+        //     mesh.geometry.verticesNeedUpdate = true;
+        //     mesh.geometry.normalsNeedUpdate = true;
+        //     mesh.geometry.computeVertexNormals();
+        //     mesh.geometry.computeFaceNormals();
+        // }
 
         // function makeRoughGround(mesh, distortionFr) {
         //     mesh.geometry.vertices.forEach(function (vertex, i) {
