@@ -1,41 +1,45 @@
 import SimplexNoise from 'simplex-noise';
 import kiddiegoggles from './assets/audio/kiddiegoggles.mp3';
 import * as THREE from 'three';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import './style.css';
 
 const onDocumentClicked = () => {
-    //initialise simplex noise instance
-    var noise = new SimplexNoise();
+    // //initialise simplex noise instance
+    // var noise = new SimplexNoise();
 
-    // create an AudioListener and add it to the camera
-    const listener = new THREE.AudioListener();
+    // // create an AudioListener and add it to the camera
+    // const listener = new THREE.AudioListener();
 
-    // create an Audio source
-    const sound = new THREE.Audio( listener );
+    // // create an Audio source
+    // const sound = new THREE.Audio( listener );
 
-    // load a sound and set it as the Audio object's buffer
-    const audioLoader = new THREE.AudioLoader();
-    audioLoader.load( kiddiegoggles, function( buffer ) {
-        sound.setBuffer( buffer );
-        sound.setLoop(true);
-        sound.setVolume(0.5);
-    });
+    // // load a sound and set it as the Audio object's buffer
+    // const audioLoader = new THREE.AudioLoader();
+    // audioLoader.load( kiddiegoggles, function( buffer ) {
+    //     sound.setBuffer( buffer );
+    //     sound.setLoop(true);
+    //     sound.setVolume(0.5);
+    // });
 
-    play();
+    function vizInit() {
+        // var context = new AudioContext();
+        // var audio = document.getElementById("audio");
+        // audio.src = kiddiegoggles;
+        // audio.load();
+        // audio.play();
 
-    function play() {
-        var context = new AudioContext();
-        var audio = document.getElementById("audio");
-        audio.src = kiddiegoggles;
-        audio.load();
-        audio.play();
-        var src = context.createMediaElementSource(audio);
-        var analyser = context.createAnalyser();
-        src.connect(analyser);
-        analyser.connect(context.destination);
-        analyser.fftSize = 512;
-        var bufferLength = analyser.frequencyBinCount;
-        var dataArray = new Uint8Array(bufferLength);
+        // var src;
+        // if (src == undefined) {
+        //     src = context.createMediaElementSource(audio);  
+        // }
+        
+        // var analyser = context.createAnalyser();
+        // src.connect(analyser);
+        // analyser.connect(context.destination);
+        // analyser.fftSize = 512;
+        // var bufferLength = analyser.frequencyBinCount;
+        // var dataArray = new Uint8Array(bufferLength);
 
         //here comes the webgl
         var scene = new THREE.Scene();
@@ -55,15 +59,15 @@ const onDocumentClicked = () => {
             wireframe: true
         });
         
-        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = -0.5 * Math.PI;
-        plane.position.set(0, 30, 0);
-        group.add(plane);
+        // var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        // plane.rotation.x = -0.5 * Math.PI;
+        // plane.position.set(0, 30, 0);
+        // group.add(plane);
         
-        var plane2 = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane2.rotation.x = -0.5 * Math.PI;
-        plane2.position.set(0, -30, 0);
-        group.add(plane2);
+        // var plane2 = new THREE.Mesh(planeGeometry, planeMaterial);
+        // plane2.rotation.x = -0.5 * Math.PI;
+        // plane2.position.set(0, -30, 0);
+        // group.add(plane2);
 
         var icosahedronGeometry = new THREE.IcosahedronGeometry(10, 4);
         var lambertMaterial = new THREE.MeshLambertMaterial({
@@ -85,8 +89,8 @@ const onDocumentClicked = () => {
         spotLight.castShadow = true;
         scene.add(spotLight);
 
-        // var orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-        // orbitControls.autoRotate = true;
+        var orbitControls = new OrbitControls(camera, renderer.domElement);
+        orbitControls.autoRotate = true;
         
         scene.add(group);
 
@@ -97,26 +101,30 @@ const onDocumentClicked = () => {
         render();
 
         function render() {
-        analyser.getByteFrequencyData(dataArray);
+        // analyser.getByteFrequencyData(dataArray);
 
-        var lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
-        var upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
+        // var lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
+        // var upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
 
-        var overallAvg = avg(dataArray);
-        var lowerMax = max(lowerHalfArray);
-        var lowerAvg = avg(lowerHalfArray);
-        var upperMax = max(upperHalfArray);
-        var upperAvg = avg(upperHalfArray);
+        // var overallAvg = avg(dataArray);
+        // var lowerMax = max(lowerHalfArray);
+        // var lowerAvg = avg(lowerHalfArray);
+        // var upperMax = max(upperHalfArray);
+        // var upperAvg = avg(upperHalfArray);
 
-        var lowerMaxFr = lowerMax / lowerHalfArray.length;
-        var lowerAvgFr = lowerAvg / lowerHalfArray.length;
-        var upperMaxFr = upperMax / upperHalfArray.length;
-        var upperAvgFr = upperAvg / upperHalfArray.length;
+        // var lowerMaxFr = lowerMax / lowerHalfArray.length;
+        // var lowerAvgFr = lowerAvg / lowerHalfArray.length;
+        // var upperMaxFr = upperMax / upperHalfArray.length;
+        // var upperAvgFr = upperAvg / upperHalfArray.length;
 
-        makeRoughGround(plane, modulate(upperAvgFr, 0, 1, 0.5, 4));
-        makeRoughGround(plane2, modulate(lowerMaxFr, 0, 1, 0.5, 4));
+        // makeRoughGround(plane, modulate(upperAvgFr, 0, 1, 0.5, 4));
+        // makeRoughGround(plane2, modulate(lowerMaxFr, 0, 1, 0.5, 4));
         
-        makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
+
+        //REMOVE THIS LATER, just inits for testing
+        // var lowerMaxFr = 0.5
+        // var upperAvgFr = 0.5
+        // makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
 
         group.rotation.y += 0.005;
         renderer.render(scene, camera);
@@ -129,34 +137,34 @@ const onDocumentClicked = () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function makeRoughBall(mesh, bassFr, treFr) {
-            mesh.geometry.vertices.forEach(function (vertex, i) {
-                var offset = mesh.geometry.parameters.radius;
-                var amp = 7;
-                var time = window.performance.now();
-                vertex.normalize();
-                var rf = 0.00001;
-                var distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
-                vertex.multiplyScalar(distance);
-            });
-            mesh.geometry.verticesNeedUpdate = true;
-            mesh.geometry.normalsNeedUpdate = true;
-            mesh.geometry.computeVertexNormals();
-            mesh.geometry.computeFaceNormals();
-        }
+        // function makeRoughBall(mesh, bassFr, treFr) {
+        //     mesh.geometry.vertices.forEach(function (vertex, i) {
+        //         var offset = mesh.geometry.parameters.radius;
+        //         var amp = 7;
+        //         var time = window.performance.now();
+        //         vertex.normalize();
+        //         var rf = 0.00001;
+        //         var distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
+        //         vertex.multiplyScalar(distance);
+        //     });
+        //     mesh.geometry.verticesNeedUpdate = true;
+        //     mesh.geometry.normalsNeedUpdate = true;
+        //     mesh.geometry.computeVertexNormals();
+        //     mesh.geometry.computeFaceNormals();
+        // }
 
-        function makeRoughGround(mesh, distortionFr) {
-            mesh.geometry.vertices.forEach(function (vertex, i) {
-                var amp = 2;
-                var time = Date.now();
-                var distance = (noise.noise2D(vertex.x + time * 0.0003, vertex.y + time * 0.0001) + 0) * distortionFr * amp;
-                vertex.z = distance;
-            });
-            mesh.geometry.verticesNeedUpdate = true;
-            mesh.geometry.normalsNeedUpdate = true;
-            mesh.geometry.computeVertexNormals();
-            mesh.geometry.computeFaceNormals();
-        }
+        // function makeRoughGround(mesh, distortionFr) {
+        //     mesh.geometry.vertices.forEach(function (vertex, i) {
+        //         var amp = 2;
+        //         var time = Date.now();
+        //         var distance = (noise.noise2D(vertex.x + time * 0.0003, vertex.y + time * 0.0001) + 0) * distortionFr * amp;
+        //         vertex.z = distance;
+        //     });
+        //     mesh.geometry.verticesNeedUpdate = true;
+        //     mesh.geometry.normalsNeedUpdate = true;
+        //     mesh.geometry.computeVertexNormals();
+        //     mesh.geometry.computeFaceNormals();
+        // }
     };
 
 
