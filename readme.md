@@ -1,7 +1,7 @@
 # Music Visualizer
 
 ![demo](./demo.gif)
-You can view this demo video with sound here: https://github.com/Lia-C/threejs-music-visualizer/raw/master/demo.mp4
+You can view this demo video with sound here: https://youtu.be/tx9fKyjXImk
 Song credit: 37,000 feet by Mark de Clive Lowe.
 
 ## Setup
