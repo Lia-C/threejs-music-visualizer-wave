@@ -2,7 +2,7 @@
 
 ![demo](./demo.gif)
 
-You can view this demo videos with sound here: 
+You can view demo videos with sound here: 
 
 Demo 1: [Mark de Clive Lowe - 37,000 feet](https://youtu.be/tx9fKyjXImk)
 
