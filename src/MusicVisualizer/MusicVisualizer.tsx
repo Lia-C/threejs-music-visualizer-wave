@@ -53,7 +53,7 @@ const MusicVisualizer: React.FC<Props> = ({
     let group = new THREE.Group();
     let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
 
-    camera.position.set(0, 0, 200);
+    camera.position.set(0, 0, 350);
     camera.lookAt(scene.position);
     scene.add(camera);
 
@@ -138,6 +138,7 @@ const MusicVisualizer: React.FC<Props> = ({
       );
 
       let overallAvg = avg(dataArray);
+      let overallMax = max(dataArray);
       let lowerMax = max(lowerHalfArray);
       let lowerAvg = avg(lowerHalfArray);
       let upperMax = max(upperHalfArray);
@@ -169,9 +170,9 @@ const MusicVisualizer: React.FC<Props> = ({
           offset +
           midFr +
           noise.noise3D(
-            vertex.x + time * rf * 7,
-            vertex.y + time * rf * 8,
-            vertex.z + time * rf * 9
+            vertex.x + time * rf * 7 * overallMax * 0.01,
+            vertex.y + time * rf * 8 * bassFr * 0.01,
+            vertex.z + time * rf * 9 * treFr * 0.01,
           ) *
             amp *
             treFr;
@@ -192,15 +193,16 @@ const MusicVisualizer: React.FC<Props> = ({
         );
         vertex.normalize();
         let distance =
+          overallAvg * 0.5 +
           offset +
-          bassFr +
+          bassFr*2 +
+          treFr*1.5 +
           noise.noise3D(
-            vertex.x + time * rf * 7,
-            vertex.y + time * rf * 8,
-            vertex.z + time * rf * 9
+            vertex.x + (time + 5) * rf * 7 + Math.min(2, midAvg * 0.01),
+            vertex.y + (time + 5) * rf * 8 + Math.min(3, midAvg * 0.01),
+            vertex.z + (time + 5) * rf * 9 + Math.min(1, midAvg * 0.01)
           ) *
-            amp *
-            treFr;
+            amp * overallMax * 0.01;
         vertex.multiplyScalar(distance);
 
         ball.geometry.attributes.position.array[i] = vertex.x;
