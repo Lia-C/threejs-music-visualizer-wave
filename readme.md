@@ -1,7 +1,9 @@
 # Music Visualizer
 
 ![demo](./demo.gif)
+
 You can view this demo video with sound here: https://youtu.be/tx9fKyjXImk
+
 Song credit: 37,000 feet by Mark de Clive Lowe.
 
 ## Setup
