@@ -2,9 +2,11 @@
 
 ![demo](./demo.gif)
 
-You can view this demo video with sound here: https://youtu.be/tx9fKyjXImk
+You can view this demo videos with sound here: 
 
-Song credit: 37,000 feet by Mark de Clive Lowe.
+Demo 1: [Mark de Clive Lowe - 37,000 feet](https://youtu.be/tx9fKyjXImk)
+
+Demo 2: [The Backseat Lovers - Kilby Girl](https://youtu.be/6GMlkfv9ABY)
 
 ## Setup
 ``` bash
