@@ -19,9 +19,8 @@ body
     outline: none;
 }
 
-audio {
-    position: fixed;
-    left: 10px;
-    bottom: -10px;
-    width: calc(100% - 20px);
+#continue {
+    text-align: center;
+    line-height: 50vh;
+    font-size: 2em;
 }
