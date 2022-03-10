@@ -1,22 +1,21 @@
 import React from "react";
 import { render } from "react-dom";
 import MusicVisualizer from "./MusicVisualizer/MusicVisualizer";
-import audioUrl from "./assets/audio/kilby_girl.mp3";
+import audioUrl from "./assets/audio/mark_37k_feet.mp3"; //"./assets/audio/kilby_girl.mp3";
 import "./style.css";
 
 const root = document.getElementById("root");
 
 const onDocumentClicked = () => {
   render(
-    <>{new Array(16).fill(0).map(() => 
-        <MusicVisualizer
-        width={300}
-        height={300}
+    <>
+    <MusicVisualizer
+        width={900}
+        height={900}
         audioUrl={audioUrl}
         isPlayerVisible={true}
-        autoplay={false}
-      />
-    )}
+        autoplay={true}
+    />
     </>,
     root
   );
