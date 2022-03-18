@@ -25,6 +25,7 @@ const MusicVisualizer: React.FC<Props> = ({
 }): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>();
   const audioRef = useRef<HTMLAudioElement>();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   let noise = new SimplexNoise();
 
@@ -125,18 +126,18 @@ const MusicVisualizer: React.FC<Props> = ({
     // scene.add(outerBall);
     let hueInc = 20;
     let i = 0;
-    let forwardDir = true;
+    let isHueIncrementing = true;
     const render = () => {
       i++;
       if (i === 4) {
         i = 0;
-        forwardDir ? hueInc++ : hueInc--;
+        isHueIncrementing ? hueInc++ : hueInc--;
       }
       if (hueInc === 90) {
-        forwardDir = false;
+        isHueIncrementing = false;
       }
-      if (hueInc === 20) {
-        forwardDir = true;
+      else if (hueInc === 20) {
+        isHueIncrementing = true;
       }
       ambientLight.color.setHSL(hueInc/100,0.5,0.4);
       ambientLight.intensity = 0.6;
@@ -245,10 +246,11 @@ const MusicVisualizer: React.FC<Props> = ({
       requestAnimationFrame(render);
     };
     render();
-  }, [containerRef]);
+    setIsLoaded(true);
+  }, [containerRef, setIsLoaded]);
 
   return (
-    <div className={styles.container} style={{ height: height, width: width }}>
+    <div className={isLoaded ? styles.container : styles.containerNotLoaded} style={{ height: height, width: width }}>
       <div ref={containerRef}></div>
       <audio
         ref={audioRef}
