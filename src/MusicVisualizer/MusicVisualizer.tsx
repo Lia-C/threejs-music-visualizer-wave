@@ -64,14 +64,13 @@ const MusicVisualizer: React.FC<Props> = ({
     let icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
 
     let lambertMaterial = new THREE.MeshLambertMaterial({
-      color: 0x76a5af, // grey bluegreen,
+      color: 0xffffff, // grey bluegreen,
       wireframe: true,
       opacity: 0.3,
       transparent: true,
     });
 
     let material2 = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
       flatShading: true,
     });
 
@@ -113,9 +112,25 @@ const MusicVisualizer: React.FC<Props> = ({
     orbitControls.autoRotate = true;
 
     scene.add(group);
+    let hueInc = 20;
+    let i = 0;
+    let forwardDir = true;
     const render = () => {
-      analyser.getByteFrequencyData(dataArray);
+      i++;
+      if (i === 4) {
+        i = 0;
+        forwardDir ? hueInc++ : hueInc--;
+      }
+      if (hueInc === 90) {
+        forwardDir = false;
+      }
+      if (hueInc === 20) {
+        forwardDir = true;
+      }
+      ambientLight.color.setHSL(hueInc/100,0.5,0.4);
+      ambientLight.intensity = 0.6;
 
+      analyser.getByteFrequencyData(dataArray);
       // add thirds:
       let oneThirdI = dataArray.length / 3 - 1;
       let twoThirdsI = 2 * (dataArray.length / 3) - 1;
@@ -157,6 +172,8 @@ const MusicVisualizer: React.FC<Props> = ({
       let amp = 7;
       let time = window.performance.now();
       let rf = 0.00001;
+
+      ball2.material.color.setHSL(0.51, 0.7, 0.5 + upperMaxFr/2)
 
       for (let i = 0; i < ball2InitVertices.length; i += 3) {
         let offset = ball2.geometry.parameters.radius;
