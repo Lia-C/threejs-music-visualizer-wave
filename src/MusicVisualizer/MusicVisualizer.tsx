@@ -62,6 +62,7 @@ const MusicVisualizer: React.FC<Props> = ({
     renderer.setSize(width, height);
 
     let icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
+    let icosahedronGeometryOuter = new THREE.IcosahedronGeometry(600, 5);
 
     let lambertMaterial = new THREE.MeshLambertMaterial({
       color: 0xffffff, // grey bluegreen,
@@ -70,14 +71,22 @@ const MusicVisualizer: React.FC<Props> = ({
       transparent: true,
     });
 
-    let material2 = new THREE.MeshPhongMaterial({
+    let lambertMaterialOuter = new THREE.MeshLambertMaterial({
+      color: 0xffffff, // grey bluegreen,
+      wireframe: true,
+    });
+
+    let phongMaterial = new THREE.MeshPhongMaterial({
       flatShading: true,
     });
+
+    let outerBall = new THREE.Mesh(icosahedronGeometryOuter, lambertMaterialOuter);
+    outerBall.position.set(0, 0, 0);
 
     let ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
     ball.position.set(0, 0, 0);
 
-    let ball2 = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 5), material2);
+    let ball2 = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 5), phongMaterial);
     ball2.position.set(0, 0, 0);
 
     let ballInitVertices = [...ball.geometry.attributes.position.array];
@@ -110,8 +119,10 @@ const MusicVisualizer: React.FC<Props> = ({
 
     let orbitControls = new OrbitControls(camera, renderer.domElement);
     orbitControls.autoRotate = true;
+    orbitControls.enableZoom = false;
 
     scene.add(group);
+    // scene.add(outerBall);
     let hueInc = 20;
     let i = 0;
     let forwardDir = true;
@@ -173,7 +184,8 @@ const MusicVisualizer: React.FC<Props> = ({
       let time = window.performance.now();
       let rf = 0.00001;
 
-      ball2.material.color.setHSL(0.51, 0.7, 0.5 + upperMaxFr/2)
+      // OPTIONS: edit saturation 0.1 to 0.7
+      ball2.material.color.setHSL(0.51, 0.1, 0.5 + upperMaxFr/2)
 
       for (let i = 0; i < ball2InitVertices.length; i += 3) {
         let offset = ball2.geometry.parameters.radius;
@@ -210,16 +222,15 @@ const MusicVisualizer: React.FC<Props> = ({
         );
         vertex.normalize();
         let distance =
-          overallAvg * 0.5 +
-          offset +
-          bassFr*2 +
-          treFr*1.5 +
+          offset + 30 +
+          bassFr*1.5 +
+          treFr*0.2 +
           noise.noise3D(
-            vertex.x + (time + 5) * rf * 7 + Math.min(2, midAvg * 0.01),
-            vertex.y + (time + 5) * rf * 8 + Math.min(3, midAvg * 0.01),
-            vertex.z + (time + 5) * rf * 9 + Math.min(1, midAvg * 0.01)
+            vertex.x + (time + 5) * rf * 15 + Math.min(2, midAvg * 0.001),
+            vertex.y + (time + 5) * rf * 15 + Math.min(3, midAvg * 0.001),
+            vertex.z + (time + 5) * rf * 15 + Math.min(1, midAvg * 0.001)
           ) *
-            amp * overallMax * 0.01;
+            amp * overallMax * 0.005;
         vertex.multiplyScalar(distance);
 
         ball.geometry.attributes.position.array[i] = vertex.x;
@@ -228,6 +239,8 @@ const MusicVisualizer: React.FC<Props> = ({
         ball.geometry.attributes.position.needsUpdate = true;
       }
       group.rotation.y += 0.003;
+      outerBall.rotation.y -= 0.0015;
+      outerBall.rotation.x += 0.0015;
       renderer.render(scene, camera);
       requestAnimationFrame(render);
     };
