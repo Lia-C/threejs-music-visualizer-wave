@@ -6,6 +6,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import styles from "./MusicVisualizer.module.scss";
 import { avg, max, modulate } from "./MusicVisualizerHelpers";
 
+// for debugging, can remove later
+import * as asciichart from "asciichart";
+
 interface Props {
   width: number;
   height: number;
@@ -14,7 +17,7 @@ interface Props {
   autoplay?: boolean;
 }
 
-const FFTSize = 512;
+const FFTSize = 256;//512;
 
 const MusicVisualizer: React.FC<Props> = ({
   width,
@@ -54,7 +57,8 @@ const MusicVisualizer: React.FC<Props> = ({
     let group = new THREE.Group();
     let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
 
-    camera.position.set(0, 0, 350);
+    //// SET CAMERA ZOOM according to music
+    camera.position.set(0, 0, 350); 
     camera.lookAt(scene.position);
     scene.add(camera);
 
@@ -84,9 +88,11 @@ const MusicVisualizer: React.FC<Props> = ({
     let outerBall = new THREE.Mesh(icosahedronGeometryOuter, lambertMaterialOuter);
     outerBall.position.set(0, 0, 0);
 
+    //outer mesh
     let ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
     ball.position.set(0, 0, 0);
 
+    //inner crystals
     let ball2 = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 5), phongMaterial);
     ball2.position.set(0, 0, 0);
 
@@ -120,7 +126,7 @@ const MusicVisualizer: React.FC<Props> = ({
 
     let orbitControls = new OrbitControls(camera, renderer.domElement);
     orbitControls.autoRotate = true;
-    orbitControls.enableZoom = false;
+    orbitControls.enableZoom = true;
 
     scene.add(group);
     // scene.add(outerBall);
@@ -163,6 +169,8 @@ const MusicVisualizer: React.FC<Props> = ({
         dataArray.length / 2 - 1,
         dataArray.length - 1
       );
+
+      console.log(asciichart.plot(dataArray, { height: 10 }))
 
       let overallAvg = avg(dataArray);
       let overallMax = max(dataArray);
@@ -222,6 +230,7 @@ const MusicVisualizer: React.FC<Props> = ({
           ballInitVertices[i + 2]
         );
         vertex.normalize();
+
         let distance =
           offset + 30 +
           bassFr*1.5 +
