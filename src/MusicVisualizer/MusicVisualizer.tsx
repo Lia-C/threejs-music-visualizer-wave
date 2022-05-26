@@ -15,6 +15,7 @@ interface Props {
   audioUrl: string;
   isPlayerVisible?: boolean;
   autoplay?: boolean;
+  userZoomControls?: boolean;
 }
 
 const FFTSize = 256;//512;
@@ -25,6 +26,7 @@ const MusicVisualizer: React.FC<Props> = ({
   audioUrl,
   isPlayerVisible,
   autoplay,
+  userZoomControls,
 }): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>();
   const audioRef = useRef<HTMLAudioElement>();
@@ -58,7 +60,7 @@ const MusicVisualizer: React.FC<Props> = ({
     let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
 
     //// SET CAMERA ZOOM according to music
-    camera.position.set(0, 0, 350); 
+    camera.position.set(0, 0, 400); 
     camera.lookAt(scene.position);
     scene.add(camera);
 
@@ -85,22 +87,23 @@ const MusicVisualizer: React.FC<Props> = ({
       flatShading: true,
     });
 
-    let outerBall = new THREE.Mesh(icosahedronGeometryOuter, lambertMaterialOuter);
+    // background ball
+    // let bgBall = new THREE.Mesh(icosahedronGeometryOuter, lambertMaterialOuter);
+    // bgBall.position.set(0, 0, 0);
+
+    // outer mesh ball
+    let outerBall = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
     outerBall.position.set(0, 0, 0);
 
-    //outer mesh
-    let ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-    ball.position.set(0, 0, 0);
+    // inner crystals
+    let innerBall = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 5), phongMaterial);
+    innerBall.position.set(0, 0, 0);
 
-    //inner crystals
-    let ball2 = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 5), phongMaterial);
-    ball2.position.set(0, 0, 0);
+    let outerBallInitVertices = [...outerBall.geometry.attributes.position.array];
+    let innerBallInitVertices = [...innerBall.geometry.attributes.position.array];
 
-    let ballInitVertices = [...ball.geometry.attributes.position.array];
-    let ball2InitVertices = [...ball2.geometry.attributes.position.array];
-
-    group.add(ball);
-    group.add(ball2);
+    group.add(outerBall);
+    group.add(innerBall);
 
     let ambientLight = new THREE.AmbientLight(0xffffff);
     ambientLight.intensity = 0.5;
@@ -126,10 +129,10 @@ const MusicVisualizer: React.FC<Props> = ({
 
     let orbitControls = new OrbitControls(camera, renderer.domElement);
     orbitControls.autoRotate = true;
-    orbitControls.enableZoom = true;
+    orbitControls.enableZoom = userZoomControls;
 
     scene.add(group);
-    // scene.add(outerBall);
+    // scene.add(bgBall);
     let hueInc = 20;
     let i = 0;
     let isHueIncrementing = true;
@@ -152,16 +155,14 @@ const MusicVisualizer: React.FC<Props> = ({
       // add thirds:
       let oneThirdI = dataArray.length / 3 - 1;
       let twoThirdsI = 2 * (dataArray.length / 3) - 1;
-      let lowArray = dataArray.slice(0, oneThirdI);
-      let midArray = dataArray.slice(oneThirdI, twoThirdsI);
-      let hiArray = dataArray.slice(twoThirdsI, dataArray.length - 1);
 
-      let lowMax = max(lowArray);
-      let lowAvg = avg(lowArray);
-      let midMax = max(midArray);
-      let midAvg = avg(midArray);
-      let hiMax = max(hiArray);
-      let hiAvg = avg(hiArray);
+      let floor = 1;
+      let lowThirdArray = dataArray.slice(floor, oneThirdI);
+      let midThirdArray = dataArray.slice(oneThirdI, twoThirdsI);
+      let hiThirdArray = dataArray.slice(twoThirdsI, dataArray.length - 1);
+
+      let fourFifthsI = 4 * (dataArray.length / 5) - 1;
+      let hiFifthArray = dataArray.slice(fourFifthsI, dataArray.length - 1);
 
       //orig: 2 halves
       let lowerHalfArray = dataArray.slice(0, dataArray.length / 2 - 1);
@@ -174,79 +175,127 @@ const MusicVisualizer: React.FC<Props> = ({
 
       let overallAvg = avg(dataArray);
       let overallMax = max(dataArray);
-      let lowerMax = max(lowerHalfArray);
-      let lowerAvg = avg(lowerHalfArray);
-      let upperMax = max(upperHalfArray);
-      let upperAvg = avg(upperHalfArray);
+      let lowerHalfMax = max(lowerHalfArray);
+      let upperHalfMax = max(upperHalfArray);
 
-      let lowerMaxFr = lowerMax / lowerHalfArray.length;
-      let lowerAvgFr = lowerAvg / lowerHalfArray.length;
-      let upperMaxFr = upperMax / upperHalfArray.length;
-      let upperAvgFr = upperAvg / upperHalfArray.length;
+      let lowThirdMax = max(lowThirdArray);
+      let midThirdMax = max(midThirdArray);
+      let hiThirdMax = max(hiThirdArray);
 
-      let midFr = modulate(midMax, 0, 1, 0, 0.002);
+      let hiFifthMax = max(hiFifthArray);
 
-      let bassFr = modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0.5, 8);
-      let treFr = modulate(upperMaxFr, 0, 1, 0.5, 4);
+
+      /// KNOBS
+      //  halves
+      let lowerHalfMaxFr = lowerHalfMax / lowerHalfArray.length;
+      let upperHalfMaxFr = upperHalfMax / upperHalfArray.length;
+  
+      let lowerHalfAvg = avg(lowerHalfArray);
+      let upperHalfAvg = avg(upperHalfArray);
+
+      //  thirds
+      let lowThirdMaxFr = lowThirdMax / lowThirdArray.length;
+      let midThirdMaxFr = midThirdMax / midThirdArray.length;
+      let hiThirdMaxFr = hiThirdMax / hiThirdArray.length;
+
+      let lowThirdAvg = avg(lowThirdArray);
+      let midThirdAvg = avg(midThirdArray);
+      let hiThirdAvg = avg(hiThirdArray);
+
+      // highest fifth
+      let hiFifthMaxFr = hiFifthMax / hiFifthArray.length;
+      let hiFifthAvgFr = avg(hiFifthArray);
+
+      ////
+
+      let midFr = modulate(midThirdMaxFr, 0, 1, 0, 0.002);
+
+      let bassFr = modulate(Math.pow(lowThirdAvg, 0.8), 0, 1, 0.5, 8);
+      let treFr = modulate(hiThirdMaxFr, 0, 1, 0.5, 4);
 
       let amp = 7;
       let time = window.performance.now();
       let rf = 0.00001;
 
       // OPTIONS: edit saturation 0.1 to 0.7
-      ball2.material.color.setHSL(0.51, 0.1, 0.5 + upperMaxFr/2)
+      innerBall.material.color.setHSL(0.51, 0.1, 0.5 + upperHalfMaxFr/2);
 
-      for (let i = 0; i < ball2InitVertices.length; i += 3) {
-        let offset = ball2.geometry.parameters.radius;
-        let vertex = new THREE.Vector3(
-          ball2InitVertices[i],
-          ball2InitVertices[i + 1],
-          ball2InitVertices[i + 2]
-        );
-        vertex.normalize();
-        let distance =
-          offset +
-          midFr +
+      const innerBallOffset = () => {
+        const maxOffset = 200;
+        return innerBall.geometry.parameters.radius +
+          Math.min(maxOffset, 
+            midFr + 
+            treFr*0.7 +
+            hiFifthMaxFr*0.5
+          )
+      };
+   
+      const innerBallNoise = (vertex: THREE.Vector3) => {
+        const maxSpin = 100;
+        const maxOffset = 200;
+        return Math.min(maxOffset, 
           noise.noise3D(
             vertex.x + time * rf * 7 * overallMax * 0.01,
-            vertex.y + time * rf * 8 * bassFr * 0.01,
-            vertex.z + time * rf * 9 * treFr * 0.01,
+            vertex.y + time * rf * 8 * Math.min(treFr * 0.01, maxSpin),
+            vertex.z + time * rf * 9 * Math.min(midFr * 0.01, maxSpin),
           ) *
             amp *
-            treFr;
-        vertex.multiplyScalar(distance);
+            treFr*0.5
+           );
+      };
 
-        ball2.geometry.attributes.position.array[i] = vertex.x;
-        ball2.geometry.attributes.position.array[i + 1] = vertex.y;
-        ball2.geometry.attributes.position.array[i + 2] = vertex.z;
-        ball2.geometry.attributes.position.needsUpdate = true;
-      }
+      let maxInnerBallExtrusion = 0;
 
-      for (let i = 0; i < ballInitVertices.length; i += 3) {
-        let offset = ball.geometry.parameters.radius;
+      for (let i = 0; i < innerBallInitVertices.length; i += 3) {
         let vertex = new THREE.Vector3(
-          ballInitVertices[i],
-          ballInitVertices[i + 1],
-          ballInitVertices[i + 2]
+          innerBallInitVertices[i],
+          innerBallInitVertices[i + 1],
+          innerBallInitVertices[i + 2]
         );
         vertex.normalize();
 
-        let distance =
-          offset + 30 +
-          bassFr*1.5 +
-          treFr*0.2 +
-          noise.noise3D(
-            vertex.x + (time + 5) * rf * 15 + Math.min(2, midAvg * 0.001),
-            vertex.y + (time + 5) * rf * 15 + Math.min(3, midAvg * 0.001),
-            vertex.z + (time + 5) * rf * 15 + Math.min(1, midAvg * 0.001)
-          ) *
-            amp * overallMax * 0.005;
-        vertex.multiplyScalar(distance);
+        let innerBallNoiseForVertex = innerBallNoise(vertex);
 
-        ball.geometry.attributes.position.array[i] = vertex.x;
-        ball.geometry.attributes.position.array[i + 1] = vertex.y;
-        ball.geometry.attributes.position.array[i + 2] = vertex.z;
-        ball.geometry.attributes.position.needsUpdate = true;
+        maxInnerBallExtrusion = Math.max(maxInnerBallExtrusion, innerBallNoiseForVertex)
+        
+        vertex.multiplyScalar(innerBallOffset() + innerBallNoiseForVertex);
+
+        innerBall.geometry.attributes.position.array[i] = vertex.x;
+        innerBall.geometry.attributes.position.array[i + 1] = vertex.y;
+        innerBall.geometry.attributes.position.array[i + 2] = vertex.z;
+        innerBall.geometry.attributes.position.needsUpdate = true;
+      }
+
+      const outerBallOffset = () => {
+        return outerBall.geometry.parameters.radius + 
+        maxInnerBallExtrusion*0.5 +
+        bassFr*0.15 +
+        midFr*0.25 
+      };
+
+      const outerBallNoise = (vertex: THREE.Vector3) => {
+        return noise.noise3D(
+          vertex.x + (time + 5) * rf * 20 + Math.min(2, lowThirdAvg * 0.01),
+          vertex.y + (time + 5) * rf * 15 + Math.min(3, midThirdAvg * 0.01)*innerBallOffset()*0.01,
+          vertex.z + (time + 5) * rf * 15 + Math.min(1, overallMax * 0.01),
+        ) *
+          amp * overallMax * 0.005
+      };
+
+      for (let i = 0; i < outerBallInitVertices.length; i += 3) {
+        let vertex = new THREE.Vector3(
+          outerBallInitVertices[i],
+          outerBallInitVertices[i + 1],
+          outerBallInitVertices[i + 2]
+        );
+        vertex.normalize();
+
+        vertex.multiplyScalar(outerBallOffset() + outerBallNoise(vertex));
+
+        outerBall.geometry.attributes.position.array[i] = vertex.x;
+        outerBall.geometry.attributes.position.array[i + 1] = vertex.y;
+        outerBall.geometry.attributes.position.array[i + 2] = vertex.z;
+        outerBall.geometry.attributes.position.needsUpdate = true;
       }
       group.rotation.y += 0.003;
       outerBall.rotation.y -= 0.0015;
