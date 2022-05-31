@@ -58,7 +58,7 @@ const MusicVisualizer: React.FC<Props> = ({
 
     let scene = new THREE.Scene();
     let group = new THREE.Group();
-    let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
 
     //// SET CAMERA ZOOM according to music
     camera.position.set(500, 500, 500); 
@@ -68,9 +68,6 @@ const MusicVisualizer: React.FC<Props> = ({
     let renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     containerRef.current.appendChild(renderer.domElement);
     renderer.setSize(width, height);
-
-    let icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
-    let icosahedronGeometryOuter = new THREE.IcosahedronGeometry(600, 5);
 
     let lambertMaterial = new THREE.MeshLambertMaterial({
       color: 0xffffff, // grey bluegreen,
@@ -103,14 +100,20 @@ const MusicVisualizer: React.FC<Props> = ({
     var particleTexture = loader.load(spriteAsset);
     var spriteMaterial = new THREE.SpriteMaterial( { map: particleTexture, transparent : true, opacity :1, color: 0xffffff } );
                       
-    for ( var x = 0; x < 100; x ++ )
-    {
-          for ( var y = 0; y < 100; y ++ )
+    const dataArraySize = FFTSize / 2;
+    const skipInterval = 5;
+    const X_NUM_PARTICLES = dataArraySize / skipInterval; //100
+    const Y_NUM_PARTICLES = dataArraySize / skipInterval;
+
+  
+    for ( var x = 0; x < X_NUM_PARTICLES; x ++ )
+    { 
+          for ( var y = 0; y < Y_NUM_PARTICLES; y ++ )
           {            
                 // Sprite creation
                 var mesh = new THREE.Sprite( spriteMaterial );
                 
-                mesh.scale.set(10,10,10);                 // scale
+                mesh.scale.set(4,4,4);                 // scale
                 mesh.position.x = x * OBJECTS_MARGIN;    // POSITION X
                 mesh.position.y = 0;
                 mesh.position.z = y * OBJECTS_MARGIN;    //POSITION Y
@@ -118,8 +121,6 @@ const MusicVisualizer: React.FC<Props> = ({
                 waveobjects.push(mesh); 
           }
     }
-
-    // group.add(waveobjects);
 
     let ambientLight = new THREE.AmbientLight(0xffffff);
     ambientLight.intensity = 1.0;
@@ -144,32 +145,36 @@ const MusicVisualizer: React.FC<Props> = ({
     // scene.add(spotLight3);
 
     let orbitControls = new OrbitControls(camera, renderer.domElement);
-    orbitControls.autoRotate = true;
+    orbitControls.autoRotate = false;
     // orbitControls.autoRotateSpeed = 4.0;
     orbitControls.enableZoom = userZoomControls;
+    orbitControls.enablePan = true;
+
+    orbitControls.target.set(256, 256, 256);
 
     scene.add(group);
 
-    let hueInc = 20;
-    let i = 0;
-    let isHueIncrementing = true;
+    // let hueInc = 20;
+    // let i = 0;
+    // let isHueIncrementing = true;
 
     const render = () => {
-      i++;
-      if (i === 4) {
-        i = 0;
-        isHueIncrementing ? hueInc++ : hueInc--;
-      }
-      if (hueInc === 90) {
-        isHueIncrementing = false;
-      }
-      else if (hueInc === 20) {
-        isHueIncrementing = true;
-      }
-      ambientLight.color.setHSL(hueInc/100,0.5,0.4);
-      ambientLight.intensity = 0.6;
+      // i++;
+      // if (i === 4) {
+      //   i = 0;
+      //   isHueIncrementing ? hueInc++ : hueInc--;
+      // }
+      // if (hueInc === 90) {
+      //   isHueIncrementing = false;
+      // }
+      // else if (hueInc === 20) {
+      //   isHueIncrementing = true;
+      // }
+      // ambientLight.color.setHSL(hueInc/100,0.5,0.4);
+      // ambientLight.intensity = 0.6;
 
-      analyser.getByteFrequencyData(dataArray);
+      analyser.getByteFrequencyData(dataArray); //len FFTSize / 2 = 128
+
       // add thirds:
       let oneThirdI = dataArray.length / 3 - 1;
       let twoThirdsI = 2 * (dataArray.length / 3) - 1;
@@ -240,14 +245,24 @@ const MusicVisualizer: React.FC<Props> = ({
       var delta = clock.getDelta();
       var elapsed = clock.elapsedTime;
           
-      for(var i = 0 ; i < waveobjects.length ; i++)
-      {
-      waveobjects[i].position.y = Math.cos( (elapsed + (waveobjects[i].position.x /WAVEWIDTH) + (waveobjects[i].position.z /WAVEWIDTH) ) *WAVESPEED ) * WAVEHEIGHT;
+      for(var i = 0 ; i < waveobjects.length ; i++){
+        waveobjects[i].position.y =  WAVEHEIGHT * Math.cos(  
+          WAVESPEED*(
+            elapsed +
+            (waveobjects[i].position.x /WAVEWIDTH) +
+            (waveobjects[i].position.z /WAVEWIDTH))
+        );
       }
 
+      let j = 0;
+      for ( var x = 0; x < X_NUM_PARTICLES; x ++ ){ 
+        for ( var y = 0; y < Y_NUM_PARTICLES; y ++ ){            
+          waveobjects[j].position.y *= Math.max(0.01*dataArray[x*skipInterval], 0.5); 
+          j++;
+      }
+      }
 
       orbitControls.update();
-    
 
       renderer.render(scene, camera);
       requestAnimationFrame(render);

@@ -4,14 +4,17 @@ h1{
 
 .container {
   position: relative;
-  background: radial-gradient(
-    circle,
-    rgb(0, 255, 255) 0%,
-    rgb(5, 38, 100) 14%,
-    rgba(18, 31, 66, 1) 30%,
-    rgba(28, 25, 45, 1) 50%,
-    rgba(0, 0, 0, 1) 100%
-  );
+  background: black;
+  // background: radial-gradient(
+  //   circle,
+  //   rgb(0, 255, 255) 0%,
+  //   rgb(5, 38, 100) 14%,
+  //   rgba(18, 31, 66, 1) 30%,
+  //   rgba(28, 25, 45, 1) 50%,
+  //   rgba(0, 0, 0, 1) 100%
+  // );
+  // background-image: url('http://i.stack.imgur.com/kx8MT.gif');
+  // background-size: cover;
   display: inline-block;
 }
 
