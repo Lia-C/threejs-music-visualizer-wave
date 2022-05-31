@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import SimplexNoise from "simplex-noise";
 import * as THREE from "three";
+import Nebula from "three-nebula";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
+import spriteAsset from '../assets/sprites/sprite.png';
 import styles from "./MusicVisualizer.module.scss";
 import { avg, max, modulate } from "./MusicVisualizerHelpers";
 
@@ -60,7 +61,7 @@ const MusicVisualizer: React.FC<Props> = ({
     let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
 
     //// SET CAMERA ZOOM according to music
-    camera.position.set(0, 0, 400); 
+    camera.position.set(500, 500, 500); 
     camera.lookAt(scene.position);
     scene.add(camera);
 
@@ -87,45 +88,60 @@ const MusicVisualizer: React.FC<Props> = ({
       flatShading: true,
     });
 
-    // background ball
-    // let bgBall = new THREE.Mesh(icosahedronGeometryOuter, lambertMaterialOuter);
-    // bgBall.position.set(0, 0, 0);
 
-    // outer mesh ball
-    let outerBall = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-    outerBall.position.set(0, 0, 0);
+    const WAVESPEED = 1;
+    const WAVEWIDTH = 200;
+    const WAVEHEIGHT = 100;
+    const OBJECTS_MARGIN = 20;
+  
+    let waveobjects = new Array();
+    const clock = new THREE.Clock();
 
-    // inner crystals
-    let innerBall = new THREE.Mesh(new THREE.IcosahedronGeometry(6, 5), phongMaterial);
-    innerBall.position.set(0, 0, 0);
+    
+    // ---------------- PARTICLES ----------------
+    const loader = new THREE.TextureLoader();
+    var particleTexture = loader.load(spriteAsset);
+    var spriteMaterial = new THREE.SpriteMaterial( { map: particleTexture, transparent : true, opacity :1, color: 0xffffff } );
+                      
+    for ( var x = 0; x < 100; x ++ )
+    {
+          for ( var y = 0; y < 100; y ++ )
+          {            
+                // Sprite creation
+                var mesh = new THREE.Sprite( spriteMaterial );
+                
+                mesh.scale.set(10,10,10);                 // scale
+                mesh.position.x = x * OBJECTS_MARGIN;    // POSITION X
+                mesh.position.y = 0;
+                mesh.position.z = y * OBJECTS_MARGIN;    //POSITION Y
+                scene.add( mesh );
+                waveobjects.push(mesh); 
+          }
+    }
 
-    let outerBallInitVertices = [...outerBall.geometry.attributes.position.array];
-    let innerBallInitVertices = [...innerBall.geometry.attributes.position.array];
-
-    group.add(outerBall);
-    group.add(innerBall);
+    // group.add(waveobjects);
 
     let ambientLight = new THREE.AmbientLight(0xffffff);
-    ambientLight.intensity = 0.5;
+    ambientLight.intensity = 1.0;
     scene.add(ambientLight);
 
-    let spotLight = new THREE.SpotLight(0x6363ff); // purple-blue
-    spotLight.intensity = 1;
-    spotLight.position.set(-100, 400, 400);
-    spotLight.castShadow = false;
-    scene.add(spotLight);
+    // let spotLight = new THREE.SpotLight(0x6363ff); // purple-blue
+    // spotLight.intensity = 1;
+    // spotLight.position.set(-100, 400, 400);
+    // spotLight.castShadow = false;
+    // scene.add(spotLight);
 
-    let spotLight2 = new THREE.SpotLight(0x7de8ff); //light cyan //0xFF00FF);
-    spotLight2.intensity = 1;
-    spotLight2.position.set(-100, -400, -200);
-    spotLight2.castShadow = false;
-    scene.add(spotLight2);
+    // let spotLight2 = new THREE.SpotLight(0x7de8ff); //light cyan //0xFF00FF);
+    // spotLight2.intensity = 1;
+    // spotLight2.position.set(-100, -400, -200);
+    // spotLight2.castShadow = false;
+    // scene.add(spotLight2);
 
-    let spotLight3 = new THREE.SpotLight(0x46c7a5); //seafoam
-    spotLight3.intensity = 1;
-    spotLight3.position.set(200, 0, 0);
-    spotLight3.castShadow = false;
-    scene.add(spotLight3);
+    // let spotLight3 = new THREE.SpotLight(0x46c7a5); //seafoam
+    // spotLight3.intensity = 1;
+    // spotLight3.position.set(200, 0, 0);
+    // spotLight3.castShadow = false;
+    // scene.add(spotLight3);
 
     let orbitControls = new OrbitControls(camera, renderer.domElement);
     orbitControls.autoRotate = true;
@@ -133,11 +149,11 @@ const MusicVisualizer: React.FC<Props> = ({
     orbitControls.enableZoom = userZoomControls;
 
     scene.add(group);
-    // scene.add(bgBall);
+
     let hueInc = 20;
     let i = 0;
     let isHueIncrementing = true;
-    // let isCamZoomingIn = true;
+
     const render = () => {
       i++;
       if (i === 4) {
@@ -173,7 +189,8 @@ const MusicVisualizer: React.FC<Props> = ({
         dataArray.length - 1
       );
 
-      console.log(asciichart.plot(dataArray, { height: 10 }))
+      // LOGGING AUDIO FREQ IN CONSOLE, for debugging
+      // console.log(asciichart.plot(dataArray, { height: 10 }))
 
       let overallAvg = avg(dataArray);
       let overallMax = max(dataArray);
@@ -219,111 +236,15 @@ const MusicVisualizer: React.FC<Props> = ({
       let time = window.performance.now();
       let rf = 0.00001;
 
-      // OPTIONS: edit saturation 0.1 to 0.7
-      innerBall.material.color.setHSL(0.51, 0.1, 0.5 + upperHalfMaxFr/2);
 
-      const innerBallOffset = () => {
-        const maxOffset = 200;
-        return innerBall.geometry.parameters.radius +
-          Math.min(maxOffset, 
-            midFr + 
-            treFr*0.7 +
-            hiFifthMaxFr*0.5
-          )
-      };
-   
-      const innerBallNoise = (vertex: THREE.Vector3) => {
-        const maxSpin = 100;
-        const maxOffset = 200;
-        return Math.min(maxOffset, 
-          noise.noise3D(
-            vertex.x + time * rf * 7 * overallMax * 0.01,
-            vertex.y + time * rf * 8 * Math.min(treFr * 0.01, maxSpin),
-            vertex.z + time * rf * 9 * Math.min(midFr * 0.01, maxSpin),
-          ) *
-            amp *
-            treFr*0.5
-           );
-      };
-
-      let maxInnerBallExtrusion = 0;
-
-      for (let i = 0; i < innerBallInitVertices.length; i += 3) {
-        let vertex = new THREE.Vector3(
-          innerBallInitVertices[i],
-          innerBallInitVertices[i + 1],
-          innerBallInitVertices[i + 2]
-        );
-        vertex.normalize();
-
-        let innerBallNoiseForVertex = innerBallNoise(vertex);
-
-        maxInnerBallExtrusion = Math.max(maxInnerBallExtrusion, innerBallNoiseForVertex)
-        
-        vertex.multiplyScalar(innerBallOffset() + innerBallNoiseForVertex);
-
-        innerBall.geometry.attributes.position.array[i] = vertex.x;
-        innerBall.geometry.attributes.position.array[i + 1] = vertex.y;
-        innerBall.geometry.attributes.position.array[i + 2] = vertex.z;
-        innerBall.geometry.attributes.position.needsUpdate = true;
+      var delta = clock.getDelta();
+      var elapsed = clock.elapsedTime;
+          
+      for(var i = 0 ; i < waveobjects.length ; i++)
+      {
+      waveobjects[i].position.y = Math.cos( (elapsed + (waveobjects[i].position.x /WAVEWIDTH) + (waveobjects[i].position.z /WAVEWIDTH) ) *WAVESPEED ) * WAVEHEIGHT;
       }
 
-      const outerBallOffset = () => {
-        return outerBall.geometry.parameters.radius + 
-        maxInnerBallExtrusion*0.5 +
-        bassFr*0.15 +
-        midFr*0.25 
-      };
-
-      const outerBallNoise = (vertex: THREE.Vector3) => {
-        return noise.noise3D(
-          vertex.x + (time + 5) * rf * 20 + Math.min(2, lowThirdAvg * 0.01),
-          vertex.y + (time + 5) * rf * 15 + Math.min(3, midThirdAvg * 0.01)*innerBallOffset()*0.01,
-          vertex.z + (time + 5) * rf * 15 + Math.min(1, overallMax * 0.01),
-        ) *
-          amp * overallMax * 0.005
-      };
-
-      for (let i = 0; i < outerBallInitVertices.length; i += 3) {
-        let vertex = new THREE.Vector3(
-          outerBallInitVertices[i],
-          outerBallInitVertices[i + 1],
-          outerBallInitVertices[i + 2]
-        );
-        vertex.normalize();
-
-        vertex.multiplyScalar(outerBallOffset() + outerBallNoise(vertex));
-
-        outerBall.geometry.attributes.position.array[i] = vertex.x;
-        outerBall.geometry.attributes.position.array[i + 1] = vertex.y;
-        outerBall.geometry.attributes.position.array[i + 2] = vertex.z;
-        outerBall.geometry.attributes.position.needsUpdate = true;
-      }
-      group.rotation.y += 0.003;
-      outerBall.rotation.y -= 0.0015;
-      outerBall.rotation.x += 0.0015;
-
-      const MAX_ZOOM_IN_DIST = 50;
-      const MAX_ZOOM_OUT_DIST = 1000;
-      const CAM_ZOOM_SPEED = 1;
-      
-      
-      // if (isCamZoomingIn){
-      //   camera.position.z -= CAM_ZOOM_SPEED
-      // } else{
-      //   camera.position.z += CAM_ZOOM_SPEED
-      // }
-
-      // // update isCamZoomingIn if needed
-      // if (camera.position.z >= MAX_ZOOM_OUT_DIST){
-      //   isCamZoomingIn = true;
-      // } 
-
-      // if (camera.position.z <= MAX_ZOOM_IN_DIST){
-      //   isCamZoomingIn = false;
-      // }
-
-      // console.log(isCamZoomingIn);
 
       orbitControls.update();
     

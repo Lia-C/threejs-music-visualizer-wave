@@ -6981,6 +6981,11 @@
     "picocolors" "^1.0.0"
     "source-map-js" "^1.0.2"
 
+"potpack@^1.0.1":
+  "integrity" "sha512-choctRBIV9EMT9WGAZHn3V7t0Z2pMQyl0EZE6pFc/6ml3ssw7Dlf/oAOvFwjm1HVsqfQN8GfeFyJ+d8tRzqueQ=="
+  "resolved" "https://registry.npmjs.org/potpack/-/potpack-1.0.2.tgz"
+  "version" "1.0.2"
+
 "prelude-ls@^1.2.1":
   "integrity" "sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g=="
   "resolved" "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.2.1.tgz"
@@ -8420,7 +8425,16 @@
   "resolved" "https://registry.npmjs.org/text-table/-/text-table-0.2.0.tgz"
   "version" "0.2.0"
 
-"three@^0.138.3":
+"three-nebula@^10.0.3":
+  "integrity" "sha512-cX0UVkCGKx1r36z/yo26HAjsMGa3NcSvGZlODTLo6lfNikpK7oYXgq5r4yVrjaGjhpeKnFalNTI8LsHiZ8KlYw=="
+  "resolved" "https://registry.npmjs.org/three-nebula/-/three-nebula-10.0.3.tgz"
+  "version" "10.0.3"
+  dependencies:
+    "lodash" "^4.17.21"
+    "potpack" "^1.0.1"
+    "uuid" "^3.3.2"
+
+"three@^0.138.3", "three@>=0.122.0 <1.0.0":
   "integrity" "sha512-4t1cKC8gimNyJChJbaklg8W/qj3PpsLJUIFm5LIuAy/hVxxNm1ru2FGTSfbTSsuHmC/7ipsyuGKqrSAKLNtkzg=="
   "resolved" "https://registry.npmjs.org/three/-/three-0.138.3.tgz"
   "version" "0.138.3"
@@ -8683,7 +8697,7 @@
   "resolved" "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz"
   "version" "1.0.1"
 
-"uuid@^3.0.1":
+"uuid@^3.0.1", "uuid@^3.3.2":
   "integrity" "sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A=="
   "resolved" "https://registry.npmjs.org/uuid/-/uuid-3.4.0.tgz"
   "version" "3.4.0"
