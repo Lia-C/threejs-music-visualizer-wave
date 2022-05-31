@@ -129,6 +129,7 @@ const MusicVisualizer: React.FC<Props> = ({
 
     let orbitControls = new OrbitControls(camera, renderer.domElement);
     orbitControls.autoRotate = true;
+    // orbitControls.autoRotateSpeed = 4.0;
     orbitControls.enableZoom = userZoomControls;
 
     scene.add(group);
@@ -136,6 +137,7 @@ const MusicVisualizer: React.FC<Props> = ({
     let hueInc = 20;
     let i = 0;
     let isHueIncrementing = true;
+    // let isCamZoomingIn = true;
     const render = () => {
       i++;
       if (i === 4) {
@@ -300,6 +302,32 @@ const MusicVisualizer: React.FC<Props> = ({
       group.rotation.y += 0.003;
       outerBall.rotation.y -= 0.0015;
       outerBall.rotation.x += 0.0015;
+
+      const MAX_ZOOM_IN_DIST = 50;
+      const MAX_ZOOM_OUT_DIST = 1000;
+      const CAM_ZOOM_SPEED = 1;
+      
+      
+      // if (isCamZoomingIn){
+      //   camera.position.z -= CAM_ZOOM_SPEED
+      // } else{
+      //   camera.position.z += CAM_ZOOM_SPEED
+      // }
+
+      // // update isCamZoomingIn if needed
+      // if (camera.position.z >= MAX_ZOOM_OUT_DIST){
+      //   isCamZoomingIn = true;
+      // } 
+
+      // if (camera.position.z <= MAX_ZOOM_IN_DIST){
+      //   isCamZoomingIn = false;
+      // }
+
+      // console.log(isCamZoomingIn);
+
+      orbitControls.update();
+    
+
       renderer.render(scene, camera);
       requestAnimationFrame(render);
     };
