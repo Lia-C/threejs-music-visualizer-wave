@@ -1,12 +1,8 @@
 # Music Visualizer
 
-![demo](./demo.gif)
-
 You can view demo videos with sound here: 
 
-Demo 1: [Mark de Clive Lowe - 37,000 feet](https://youtu.be/tx9fKyjXImk)
-
-Demo 2: [The Backseat Lovers - Kilby Girl](https://youtu.be/6GMlkfv9ABY)
+[Demo video](https://youtu.be/qyXyam8L4Yc)
 
 ## Setup
 ``` bash
